@@ -60,7 +60,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 import com.codahale.metrics.InstrumentedExecutorService;
-import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
@@ -340,13 +339,7 @@ public final class ClusterResource {
   private Cluster updateClusterSeeds(Cluster cluster, String seedHosts) throws ReaperException {
     Set<String> newSeeds = parseSeedHosts(seedHosts);
     try {
-      Set<String> previousNodes = ImmutableSet.copyOf(clusterFacade.getLiveNodes(cluster));
       Set<String> liveNodes = ImmutableSet.copyOf(clusterFacade.getLiveNodes(cluster, newSeeds));
-
-      Preconditions.checkArgument(
-          !Collections.disjoint(previousNodes, liveNodes),
-          "Trying to update a different cluster using the same name: %s. No nodes overlap between %s and %s",
-          cluster.getName(), StringUtils.join(previousNodes, ','), StringUtils.join(liveNodes, ','));
 
       if (!cluster.getSeedHosts().equals(liveNodes)) {
         cluster = cluster.with()
